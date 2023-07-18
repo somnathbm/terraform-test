@@ -1,5 +1,12 @@
 # terraform config block
 terraform {
+    cloud {
+        organization = "somnathbm"
+
+        workspaces {
+            name = "aws-workspace"
+        }
+    }
     required_providers {
         aws = {
             source = "hashicorp/aws"
