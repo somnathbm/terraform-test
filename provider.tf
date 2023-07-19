@@ -1,16 +1,16 @@
 # terraform config block
 terraform {
+    required_version = ">= 1.5.0"
     cloud {
         organization = "somnathbm"
-
         workspaces {
-            name = "aws-workspace"
+            name = "terra-cloud-test"
         }
     }
     required_providers {
         aws = {
             source = "hashicorp/aws"
-            version = "5.8.0"
+            version = "~> 5.0"
         }
     }
 }

@@ -1,9 +1,9 @@
 # declare resource - s3 bucket
 resource "aws_s3_bucket" "tf_bucket01" {
-  bucket = "awsage-tf-bucket01"
+  bucket = "awsage-tf-bucket03"
 
   tags = {
-    Name = "awsage-tf-bucket01"
+    Name = "awsage-tf-bucket03"
     Environment = "dev"
   }
 }
