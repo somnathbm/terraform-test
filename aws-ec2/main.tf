@@ -1,10 +1,27 @@
 # define data source
 data "aws_ami" "amazon_linux" {
-    filter {
-        name = "name"
-        values = "Amazon Linux 2023 AMI"
-    }
     most_recent = true
+    owners = ["self"]
+
+    filter {
+        name = "description"
+        values = "Amazon Linux 2023 AMI*"
+    }
+
+    filter {
+        name = "architecture"
+        values = "x86_64"
+    }
+
+    filter {
+        name = "virtualization_type"
+        values = "hvm"
+    }
+
+    filter {
+        name = "root-device-type"
+        values = "ebs"
+    }
 }
 
 # define aws instance
