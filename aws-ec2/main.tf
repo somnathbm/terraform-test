@@ -23,6 +23,11 @@ data "aws_vpc" "default" {
   id      = "vpc-0f52f00b83514b404"
 }
 
+# define instance profile data source
+data "aws_iam_instance_profile" "ec2_ssm" {
+    name = "EC2SSMRole"
+}
+
 # define security groups
 # TODO - module
 # security groups resource
@@ -36,7 +41,7 @@ resource "aws_security_group" "tf_server_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.default.cidr_block]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   # outgoing traffic
@@ -56,7 +61,7 @@ resource "aws_security_group" "tf_server_sg" {
 # TODO - module
 resource "aws_instance" "apache_server" {
   # Number of EC2 instance to be created
-  count = 2
+  # count = 2
 
   # Type of EC2 instances
   instance_type = var.instance_type
@@ -68,14 +73,15 @@ resource "aws_instance" "apache_server" {
   vpc_security_group_ids = [aws_security_group.tf_server_sg.id]
 
   # IAM role
-#   iam_instance_profile = "arn:aws:iam::691685274845:instance-profile/EC2SSMRole"
+  iam_instance_profile = data.aws_iam_instance_profile.ec2_ssm.role_name
 
   # user data script
   user_data = file("./userdata.yml")
 
   # tags
   tags = {
-    Name      = "test-apache-server-${count.index}"
+    # Name      = "test-apache-server-${count.index}"
+    Name      = "test-apache-server-3"
     CreatedBy = "dev01"
   }
 }
