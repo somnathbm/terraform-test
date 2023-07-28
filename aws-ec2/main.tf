@@ -32,7 +32,7 @@ data "aws_iam_instance_profile" "ec2_ssm" {
 # TODO - module
 # security groups resource
 resource "aws_security_group" "tf_server_sg" {
-  name        = "tf_server_sg2"
+  name        = "tf_server_sg"
   description = "A security group to test out TF"
   vpc_id      = data.aws_vpc.default.id
 
@@ -53,7 +53,7 @@ resource "aws_security_group" "tf_server_sg" {
   }
 
   tags = {
-    Name = "tf_server_sg2"
+    Name = "tf_server_sg"
   }
 }
 
@@ -81,7 +81,7 @@ resource "aws_instance" "apache_server" {
   # tags
   tags = {
     # Name      = "test-apache-server-${count.index}"
-    Name      = "test-apache-server-3"
+    Name      = "test-apache-server"
     CreatedBy = "dev01"
   }
 }
