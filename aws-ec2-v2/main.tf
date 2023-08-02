@@ -57,10 +57,27 @@ resource "aws_instance" "apache_server" {
   
   # iterate through subnets
   for_each = toset(data.aws_subnets.us_east_1.ids)
+  # count = length(toset(data.aws_subnets.us_east_1.ids))
   subnet_id = each.key
+  # subnet_id = data.aws_subnets.us_east_1.ids[count.index]
 
   # tags
   tags = {
     Name = "apache-${regex("0\\w{3}", each.key)}"
+    # Name = "apache-${regex("0\\w{3}", data.aws_subnets.us_east_1.ids[count.index])}"
   }
 }
+
+# status checks
+# resource "null_resource" "apache_server_health_checks" {
+#   # count = length(toset(data.aws_subnets.us_east_1.ids))
+#   for_each = aws_instance.apache_server
+#   provisioner "local-exec" {
+#     command = "aws ec2 wait instance-status-ok --instance-ids ${aws_instance.apache_server[each.key].id} --no-verify-ssl"
+#   }
+
+#   # depends on instance
+#   depends_on = [
+#     aws_instance.apache_server
+#   ]
+# }
