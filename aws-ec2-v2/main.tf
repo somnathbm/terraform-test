@@ -1,39 +1,40 @@
-# refer the launch template
-data "aws_launch_template" "apache_lt" {
-  name = "Apache"
-}
-
 # refer to the vpc
 data "aws_vpc" "default" {
   default = true
-  id = "vpc-0f52f00b83514b404"
+  id      = "vpc-0f52f00b83514b404"
 }
 
 # refer to the subnets
 data "aws_subnets" "us_east_1" {
   filter {
-    name = "tag:Name"
+    name   = "tag:Name"
     values = ["us_east_1"]
   }
 }
 
+# random subnets resourec
+resource "random_shuffle" "subnets" {
+  input        = data.aws_subnets.us_east_1.ids
+  result_count = 1
+}
+
 # create security groups
 resource "aws_security_group" "apache_sg1" {
-  name = "apache_sg1"
+  name        = "apache_sg1"
   description = "Security group for Apache launch template"
-  vpc_id = data.aws_vpc.default.id
+  vpc_id      = data.aws_vpc.default.id
 
   ingress {
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -50,21 +51,24 @@ resource "aws_instance" "apache_server" {
   }
 
   # instance type
-  instance_type = var.instance_type
+  # instance_type = var.instance_type
+  # for_each = toset([for value in local.instance_type: "t2.${value}"]) # <-- List/tuple of instance types
+  # for_each = {for k, v in local.instance_list: k => "${v.generation}.${v.capacity}"} # <-- Map of instance type objects
+
+  // input: map of instance type object. output: map of custom object
+  for_each      = { for k, v in local.instance_list : k => { inst : "${v.generation}.${v.capacity}", subn : random_shuffle.subnets.result[0] } }
+  instance_type = each.value.inst
 
   # vpc security group ids
   vpc_security_group_ids = [aws_security_group.apache_sg1.id]
-  
-  # iterate through subnets
-  for_each = toset(data.aws_subnets.us_east_1.ids)
-  # count = length(toset(data.aws_subnets.us_east_1.ids))
-  subnet_id = each.key
-  # subnet_id = data.aws_subnets.us_east_1.ids[count.index]
+
+  # grab a random subnet
+  subnet_id = each.value.subn
 
   # tags
   tags = {
-    Name = "apache-${regex("0\\w{3}", each.key)}"
-    # Name = "apache-${regex("0\\w{3}", data.aws_subnets.us_east_1.ids[count.index])}"
+    # Name = "apache-${regex("0\\w{3}", each.key)}"
+    Name = "apache-${each.value.inst}"
   }
 }
 
