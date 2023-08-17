@@ -16,4 +16,20 @@ locals {
       capacity : "nano"
     }
   }
+
+  # SG ingress settings
+  ingress_rules = [
+    {
+      port: 80,
+      protocol: "tcp",
+      description: "HTTP port 80",
+      cidr_blocks: ["0.0.0.0/0"]
+    },
+    {
+      port: 443,
+      protocol: "tcp",
+      description: "HTTP port 443",
+      cidr_blocks: ["0.0.0.0/0"]
+    }
+  ]
 }

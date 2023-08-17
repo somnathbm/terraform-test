@@ -24,11 +24,24 @@ resource "aws_security_group" "apache_sg1" {
   description = "Security group for Apache launch template"
   vpc_id      = data.aws_vpc.default.id
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+  # ingress {
+  #   from_port   = 80
+  #   to_port     = 80
+  #   protocol    = "tcp"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  # }
+
+  # using dynamic blocks
+  dynamic "ingress" {
+    for_each = local.ingress_rules
+
+    content {
+      from_port = ingress.value.port
+      to_port = ingress.value.port
+      protocol = ingress.value.protocol
+      description = ingress.value.description
+      cidr_blocks = ingress.value.cidr_blocks
+    }
   }
 
   egress {
