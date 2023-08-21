@@ -1,5 +1,11 @@
 terraform {
   required_version = ">= 1.5.0"
+  cloud {
+    organization = "somnathbm"
+    workspaces {
+      name = "aws-terraform-test"
+    }
+  }
   required_providers {
     # aws
     aws = {

@@ -8,6 +8,12 @@
 #   }
 # }
 
+variable "server_type" {
+  type = string
+  description = "Usage type of the server"
+  default = "web-server"  
+}
+
 locals {
   instance_type = ["nano"]
   instance_list = {

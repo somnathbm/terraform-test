@@ -94,6 +94,7 @@ resource "aws_instance" "my_apache_server" {
   tags = {
     # Name = "apache-${regex("0\\w{3}", each.key)}"
     Name = "apache-${each.value.inst}"
+    UsageType = var.server_type
   }
 }
 
