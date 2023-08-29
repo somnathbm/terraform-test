@@ -18,6 +18,12 @@ resource "random_shuffle" "subnets" {
   result_count = 1
 }
 
+# key pair for the server
+resource "aws_key_pair" "apache" {
+  key_name = "my_apache_key"
+  public_key = "SHA256:+I7EFimGFGmvqZ7gTgoLOHbkM68vSFLFXThH3gCw5pk mol-it\\mukhsom@nlccu237"
+}
+
 # create security groups
 # resource "aws_security_group" "apache_sg1" {
 #   name        = "apache_sg1"
@@ -75,25 +81,30 @@ resource "aws_instance" "my_apache_server" {
   }
 
   # instance type
+  instance_type = "t2.micro"
   # instance_type = var.instance_type
   # for_each = toset([for value in local.instance_type: "t2.${value}"]) # <-- List/tuple of instance types
   # for_each = {for k, v in local.instance_list: k => "${v.generation}.${v.capacity}"} # <-- Map of instance type objects
 
   // input: map of instance type object. output: map of custom object
-  for_each      = { for k, v in local.instance_list : k => { inst : "${v.generation}.${v.capacity}", subn : random_shuffle.subnets.result[0] } }
-  instance_type = each.value.inst
+  # for_each      = { for k, v in local.instance_list : k => { inst : "${v.generation}.${v.capacity}", subn : random_shuffle.subnets.result[0] } }
+  # instance_type = each.value.inst
+
+  # key pair
+  key_name = aws_key_pair.apache.key_name
 
   # vpc security group ids
   # vpc_security_group_ids = [aws_security_group.apache_sg1.id]
   vpc_security_group_ids = [module.apache_sg.security_group_id]
 
   # grab a random subnet
-  subnet_id = each.value.subn
+  # subnet_id = each.value.subn
 
   # tags
   tags = {
     # Name = "apache-${regex("0\\w{3}", each.key)}"
-    Name = "apache-${each.value.inst}"
+    # Name = "apache-${each.value.inst}"
+    Name = "my-apache-server"
     UsageType = var.server_type
   }
 }
