@@ -21,7 +21,14 @@ resource "random_shuffle" "subnets" {
 # key pair for the server
 resource "aws_key_pair" "apache" {
   key_name = "my_apache_key"
-  public_key = "SHA256:+I7EFimGFGmvqZ7gTgoLOHbkM68vSFLFXThH3gCw5pk mol-it\\mukhsom@nlccu237"
+  public_key = <<EOF
+  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC5qO2pToaY0VXXvmv/505MNLeaCRntn60qe1XTXU9eooA7XMIWmGDC6KKcF7wtapRftLlUjNfgia
+  IqyP550mhzLiheRAseTgdRlO1+jQDPsTvdB59rM8n3mDi3QULjK7I7638b9k3+zfGkaFPqtZQu5mHNX0CkieCDO8nbIFIrO4OY73jUqgyG83o9OuqR
+  G0pUSvewUZ85mHvjNZcdI4EJP1jj8ZI7ikoB9PgKKmY7lR5/FxnUS6NZStViEn6RUntYIKAmXbxitLborSrNrkYwUG2/XDVYpc2O/+Rj91nYMnnTZ6
+  G+Xj+1x/SaG35UOXgIkt3T5ypVqmYElHd8fYCKrujTDU4heGYvsK/GbXaGCN26bqDP6ccaEbfdzkeFDuXvzDN3FO/tilfk1VEOeJ4nHT0uSiWV18ff
+  ulsMZrEzs4nC9OCYoWdmxdlJ42zi6HlUPb1hd33W8XUog2phASzuHo7KbigPG7se1zhy7VkqaoMYNTn17HlHjZRFZwb80h0= mol-it\mukhsom@nl
+  ccu237
+  EOF
 }
 
 # create security groups
