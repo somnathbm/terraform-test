@@ -63,14 +63,39 @@ resource "aws_key_pair" "apache" {
 # }
 
 # using the AWS security groups module
-module "apache_sg" {
-  source = "terraform-aws-modules/security-group/aws//modules/http-80"
+# module "apache_sg_http" {
+#   source = "terraform-aws-modules/security-group/aws//modules/http-80"
+#   version = "5.1.0"
+
+#   name = "apache_sg_http"
+#   description = "A simple SG to handle HTTP traffic"
+#   vpc_id = data.aws_vpc.default.id
+#   ingress_cidr_blocks = ["0.0.0.0/0"]
+# }
+
+module "apache_sg_hhtp_ssh" {
+  source  = "terraform-aws-modules/security-group/aws"
   version = "5.1.0"
 
   name = "apache_sg"
-  description = "A simple SG to handle HTTP traffic"
+  description = "A simple SG to handle HTTP & SSH connections"
   vpc_id = data.aws_vpc.default.id
+
   ingress_cidr_blocks = ["0.0.0.0/0"]
+  rules = {
+    "http-80-tcp": [
+      80,
+      80,
+      "tcp",
+      "To handle HTTP traffic"
+    ],
+    "ssh-tcp": [
+      22,
+      22,
+      "tcp",
+      "To handle SSH traffic"
+    ]
+  }
 }
 
 # provision EC2
@@ -95,7 +120,7 @@ resource "aws_instance" "my_apache_server" {
 
   # vpc security group ids
   # vpc_security_group_ids = [aws_security_group.apache_sg1.id]
-  vpc_security_group_ids = [module.apache_sg.security_group_id]
+  vpc_security_group_ids = [module.apache_sg_hhtp_ssh.security_group_id]
 
   # grab a random subnet
   # subnet_id = each.value.subn
