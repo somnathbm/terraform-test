@@ -82,20 +82,7 @@ module "apache_sg_hhtp_ssh" {
   vpc_id = data.aws_vpc.default.id
 
   ingress_cidr_blocks = ["0.0.0.0/0"]
-  rules = {
-    "http-80-tcp": [
-      80,
-      80,
-      "tcp",
-      "To handle HTTP traffic"
-    ],
-    "ssh-tcp": [
-      22,
-      22,
-      "tcp",
-      "To handle SSH traffic"
-    ]
-  }
+  ingress_rules = ["http-80-tcp", "ssh-tcp"]
 }
 
 # provision EC2
