@@ -1,61 +1,40 @@
-# create a placement group
-resource "aws_placement_group" "apache-pg" {
-  name = "apache-pg"
-  strategy = "cluster"
-}
-
-# create an ALB
-resource "aws_lb" "apache-alb" {
-  name = "apache-alb"
+# create ALB
+resource "aws_lb" "web" {
+  name = "haweye-alb"
   load_balancer_type = "application"
   internal = false
-  security_groups = data.aws_security_groups.apache-sg.ids
-  subnets = data.aws_subnets.apache.ids
+  
+  security_groups = data.aws_security_groups.apache.ids
+  subnets = data.aws_subnets.default.ids
 }
 
-# define ALB listener
-resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.apache-alb.arn
-  port = 80
+# create ALB listener
+resource "aws_lb_listener" "web_http" {
   protocol = "HTTP"
+  port = 80
+  load_balancer_arn = aws_lb.web.arn
 
   default_action {
     type = "fixed-response"
     fixed_response {
       content_type = "text/plain"
-      message_body = "404: Page not found"
+      message_body = "404: Not found"
       status_code = 404
     }
   }
 }
 
-# define ALB listener rule
-resource "aws_lb_listener_rule" "rule" {
-  listener_arn = aws_lb_listener.http.arn
-  priority = 100
-
-  condition {
-    path_pattern {
-      values = ["*"]
-    }
-  }
-
-  action {
-    type = "forward"
-    target_group_arn = aws_lb_target_group.apache-tg.arn
-  }
-}
-
-# define target group
-resource "aws_lb_target_group" "apache-tg" {
-  name = "apache-tg"
-  port = 80
+# create target group
+resource "aws_lb_target_group" "web_tg" {
+  name = "haweye-tg"
   protocol = "HTTP"
+  port = 80
   vpc_id = data.aws_vpc.default.id
 
   health_check {
     path = "/"
     protocol = "HTTP"
+    port = 80
     matcher = "200"
     interval = 15
     timeout = 3
@@ -64,26 +43,40 @@ resource "aws_lb_target_group" "apache-tg" {
   }
 }
 
-# create an autoscaling group
-resource "aws_autoscaling_group" "apache-asg" {
-  name = "apache-asg"
-  max_size = 3
-  min_size = 2
-  desired_capacity = 2
+# ALB listener rule
+resource "aws_lb_listener_rule" "web_http_rule" {
+  listener_arn = aws_lb_listener.web_http.arn
+  priority = 100
+
+  condition {
+    path_pattern {
+      values = ["*"]
+    }
+  }
+  action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.web_tg.arn
+  }
+}
+
+# create ASG
+resource "aws_autoscaling_group" "asg" {
+  name = "haweye-asg"
+  vpc_zone_identifier = data.aws_subnets.default.ids
+  target_group_arns = [aws_lb_target_group.web_tg.arn]
   health_check_type = "ELB"
-  force_delete = true
-  placement_group = aws_placement_group.apache-pg.id
-  target_group_arns = [aws_lb_target_group.apache-tg.arn]
+
+  min_size = 1
+  desired_capacity = 2
+  max_size = 3
 
   launch_template {
     name = "Apache"
   }
 
-  availability_zones = ["us-east-1a", "us-east-1e"]
-
   tag {
     key = "Name"
-    value = "apache-sg-server"
+    value = "haweye-server"
     propagate_at_launch = true
   }
 }
