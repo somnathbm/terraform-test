@@ -1,11 +1,13 @@
 # terraform config block
 terraform {
     required_version = ">= 1.5.0"
-    cloud {
-        organization = "somnathbm"
-        workspaces {
-            name = "terra-cloud-test"
-        }
+    backend "s3" {
+      bucket = "awsage-tftest-demo"
+      region = "us-east-1"
+      key = "global/s3/terraform.tfstate"
+      dynamodb_table = "tftest-locking"
+      encrypt = true
+      role_arn = "arn:aws:iam::691685274845:role/AwsageEngnrDevOrgAccessRole"
     }
     required_providers {
         aws = {
@@ -18,7 +20,7 @@ terraform {
 
 # use the declared provider
 provider "aws" {
-    region = var.provider_region
+    region = "us-east-1"
     assume_role {
         role_arn = "arn:aws:iam::691685274845:role/AwsageEngnrDevOrgAccessRole"
     }
